@@ -1,9 +1,9 @@
-public enum PlayerChoice
+public enum Choices
 {
     None,
     Attack,
     Block,
-    Parry,
+    Counter,
     Rest
 }
 

@@ -62,23 +62,56 @@ public class PairManager : NetworkBehaviour
     public void TryPairing()
     {
         if (!IsServer) return;
-
+        // Keep trying to form pairs while there are at least 2 idle players
         while (idlePlayers.Count >= 2)
         {
-            Character p1 = idlePlayers[0];
-            Character p2 = idlePlayers[1];
+            bool pairMade = false;
 
-            idlePlayers.RemoveRange(0, 2);
+            // Outer loop: iterate over idle players
+            for (int i = 0; i < idlePlayers.Count - 1; i++)
+            {
+                Character player1 = idlePlayers[i];
 
-            int key = nextPairKey++;
-            pairs[key] = (p1, p2);
+                // Inner loop: try to find a valid partner
+                for (int j = i + 1; j < idlePlayers.Count; j++)
+                {
+                    Character player2 = idlePlayers[j];
 
-            p1.SetOpponent(p2, key);
-            p2.SetOpponent(p1, key);
+                    bool sameTeam = (player1.GetTeam() != -1 && player1.GetTeam() == player2.GetTeam());
 
-            Debug.Log($"Paired {p1.name} with {p2.name} (Pair {key})");
+                    if (!sameTeam)
+                    {
+                        // Form the pair
+                        int key = nextPairKey++;
+                        pairs[key] = (player1, player2);
+
+                        player1.SetOpponent(player2, key);
+                        player2.SetOpponent(player1, key);
+
+                        // Remove both from idle list
+                        idlePlayers.Remove(player1);
+                        idlePlayers.Remove(player2);
+
+                        Debug.Log($"A pair has been created between {player1.name} and {player2.name} with the pair key of {key}");
+
+                        pairMade = true;
+                        break; // exit inner loop to restart outer loop
+                    }
+                }
+
+                if (pairMade)
+                {
+                    i = -1; // reset outer loop to start from index 0
+                    break;
+                }
+            }
+
+            // If no pair was made during the full iteration, break the while loop
+            if (!pairMade)
+                break;
         }
     }
+
     #endregion
 
     // Returns true if the number of idle players matches the expected number of players.
@@ -95,4 +128,5 @@ public class PairManager : NetworkBehaviour
         }
         return combatants;
     }
+    public int GetIdlePlayers() => idlePlayers.Count;
 }

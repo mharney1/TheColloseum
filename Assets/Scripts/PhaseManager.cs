@@ -2,6 +2,9 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 using NUnit.Framework;
+using System.Collections.Generic;
+using TMPro;
+using Unity.Services.Lobbies.Models;
 
 /// <summary>
 /// Manages the game phases for a match.
@@ -12,6 +15,20 @@ public class PhaseManager : NetworkBehaviour
 
     [Header("Settings")]
     [SerializeField] private int expectedPlayers = 2;
+
+    [Header("Prepare Phase Timing")]
+    [SerializeField] private float startTime = 15f;  // Starting timer
+    [SerializeField] private float shortenedTime = 5f; // Reduced time when all ready
+    private NetworkVariable<float> timer = new NetworkVariable<float>(
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    private List<Character> undecidedCharacters;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI prepareTimerText;
 
     public NetworkVariable<Phase> CurrentPhase = new(
         Phase.Load,
@@ -30,6 +47,12 @@ public class PhaseManager : NetworkBehaviour
             Debug.Log("XXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX\nXXXXXXXXXX");
             return;
         }
+
+        timer.OnValueChanged += (oldVal, newVal) =>
+        {
+            if (prepareTimerText != null)
+                prepareTimerText.text = Mathf.CeilToInt(newVal).ToString("00");
+        };
 
         Instance = this;
 
@@ -82,11 +105,12 @@ public class PhaseManager : NetworkBehaviour
         // Wait until all expected players are connected
         while (!PairManager.Instance.AllPlayersConnected(expectedPlayers))
         {
-            Debug.Log($"Waiting for players... ({NetworkManager.Singleton.ConnectedClientsList.Count}/{expectedPlayers})");
+            Debug.Log($"Waiting for players... {PairManager.Instance.GetIdlePlayers()}/{expectedPlayers})");
             yield return new WaitForSeconds(3f);
         }
 
-        Debug.Log("All players connected. Proceeding to next phase.");
+        Debug.Log("All players connected attemping to Pair players.");
+        PairManager.Instance.TryPairing();
     }
 
     /// <summary>
@@ -96,7 +120,31 @@ public class PhaseManager : NetworkBehaviour
     {
         Debug.Log("Phase: Prepare phase has begun.");
         CurrentPhase.Value = Phase.Prepare;
-        yield return new WaitForSeconds(3f);
+
+        timer.Value = startTime;
+        undecidedCharacters = new List<Character>(PairManager.Instance.GetCombatants());
+
+        SetPrepareTimerActiveClientRpc(true);
+
+        while (timer.Value > 0f)
+            {
+                if (undecidedCharacters.Count == 0 && timer.Value > shortenedTime)
+                    timer.Value = shortenedTime;
+
+                if (IsServer)
+                {
+                    timer.Value -= Time.deltaTime;
+                    timer.Value = Mathf.Clamp(timer.Value, 0f, startTime); // Clamp to avoid negative
+                }
+
+                yield return null;
+            }
+
+        DefaultChoice(undecidedCharacters);
+
+        SetPrepareTimerActiveClientRpc(false);
+
+        Debug.Log($"{(undecidedCharacters.Count == 0 ? "Everyone has a choice." : "Someone hasn't chosen.")}");
     }
 
     /// <summary>
@@ -116,6 +164,8 @@ public class PhaseManager : NetworkBehaviour
     {
         Debug.Log("Phase: Resolve phase has begun.");
         CurrentPhase.Value = Phase.Resolve;
+        Debug.Log("All players connected attemping to Pair players.");
+        PairManager.Instance.TryPairing();
         yield return new WaitForSeconds(3f);
     }
 
@@ -130,4 +180,30 @@ public class PhaseManager : NetworkBehaviour
     }
 
     #endregion
+
+    private void DefaultChoice(List<Character> characters)
+    {
+        foreach (Character character in new List<Character>(characters))
+        {
+            character.SetCurrentChoice(Choices.Attack);
+        }
+    }
+    public void RemoveUndecided(Character player)
+    {
+        undecidedCharacters.Remove(player);
+    }
+
+    [ClientRpc]
+    private void SetPrepareTimerActiveClientRpc(bool isActive)
+    {
+        if (prepareTimerText != null)
+        {
+            prepareTimerText.transform.parent.gameObject.SetActive(isActive);
+            Debug.Log($"{name} is attempting to {(isActive ? "enable" : "disable")} the prepare timer.");
+        }
+        else
+        {
+            Debug.LogWarning($"{name} cannot set prepare timer active: TextMeshProUGUI is null!");
+        }
+    }
 }

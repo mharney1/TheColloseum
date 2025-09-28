@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
 using UnityEngine;
 
 /// <summary>
@@ -10,16 +11,32 @@ using UnityEngine;
 public class Character : NetworkBehaviour
 {
     // Core player properties
-    public int health = 550;
-    public int exhaustion = 0;
-    public int team = -1;
-    public int pair = -1;
-
+    private NetworkVariable<int> health = new NetworkVariable<int>(
+        550, // default starting value
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+    private NetworkVariable<int> exhaustion = new NetworkVariable<int>(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+    private int team = -1;
+    private int pair = -1;
+    private bool isCycling = false;
+    [Header("Movement Settings")]
+    [SerializeField] private float speed = 2f;
+    private NetworkVariable<Choices> currentChoice = new NetworkVariable<Choices>(
+    Choices.None,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
     // Reference to the opponent character (assigned by PairManager)
-    public Character opponent;
-
-    // Networked camera for local player
-    private new Camera camera;
+    private NetworkVariable<ulong> opponentId = new NetworkVariable<ulong>(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
     /// <summary>
     /// Called when this NetworkObject spawns.
@@ -41,7 +58,6 @@ public class Character : NetworkBehaviour
         // Only the server should handle both registration and phase subscription
         StartCoroutine(RegisterAndSubscribe());
     }
-
     private void OnDisable()
     {
         // Unsubscribe from PhaseManager events to avoid memory leaks
@@ -50,22 +66,26 @@ public class Character : NetworkBehaviour
             PhaseManager.Instance.CurrentPhase.OnValueChanged -= HandlePhaseChanged;
         }
     }
-
-    /// <summary>
-    /// Assigns the opponent and pair key to this character.
-    /// Called by PairManager when creating a pair.
-    /// </summary>
-    /// <param name="newOpponent">The opponent Character</param>
-    /// <param name="pairKey">The pair identifier</param>
-    public void SetOpponent(Character newOpponent, int pairKey)
+    private void Update()
     {
-        opponent = newOpponent;
-        pair = pairKey;
+        if (!IsServer) return; // server handles movement only
 
-        if (opponent != null)
-            Debug.Log($"{name} paired with {opponent.name} (Pair {pair})");
-        else
-            Debug.Log($"{name} has no opponent assigned.");
+        if (isCycling)
+        {
+            // Move constantly to the right
+            transform.Translate(Vector3.right * speed * Time.deltaTime, Space.Self);
+
+            // Face the opponent directly
+            Character opponent = GetOpponent();
+            if (opponent != null)
+            {
+                Vector3 direction = opponent.transform.position - transform.position;
+                if (direction.sqrMagnitude > 0.001f)
+                {
+                    transform.rotation = Quaternion.LookRotation(direction);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -78,9 +98,11 @@ public class Character : NetworkBehaviour
         {
             case Phase.Prepare:
                 Debug.Log($"{name} entering Prepare phase.");
+                isCycling = opponentId.Value != 0;
                 break;
             case Phase.Action:
                 Debug.Log($"{name} entering Action phase.");
+                isCycling = false;
                 break;
             case Phase.Resolve:
                 Debug.Log($"{name} entering Resolve phase.");
@@ -91,15 +113,17 @@ public class Character : NetworkBehaviour
         }
     }
     private IEnumerator RegisterAndSubscribe()
-{
-    Debug.Log($"{name} has begun the coroutine on the {(IsServer ? "server" : "client")}.");
+    {
+        Debug.Log($"{name} has begun the coroutine on the {(IsServer ? "server" : "client")}.");
         // Wait until both managers exist
         while (PairManager.Instance == null || PhaseManager.Instance == null)
+        {
             Debug.Log("Waiting for managers...");
             yield return null;
+        }
 
-    // Subscribe all characters (server + clients)
-    PhaseManager.Instance.CurrentPhase.OnValueChanged += HandlePhaseChanged;
+        // Subscribe all characters (server + clients)
+        PhaseManager.Instance.CurrentPhase.OnValueChanged += HandlePhaseChanged;
 
         // Server-only: add to idle players
         if (IsServer)
@@ -107,7 +131,59 @@ public class Character : NetworkBehaviour
             PairManager.Instance.AddIdlePlayer(this);
         }
 
-    Debug.Log($"{name} subscribed to phase changes{(IsServer ? " and added to idle players" : "")}.");
-}
+        Debug.Log($"{name} subscribed to phase changes{(IsServer ? " and added to idle players" : "")}.");
+    }
 
+    public int GetHealth() => health.Value;
+    public int GetExhaustion() => exhaustion.Value;
+    public int GetTeam() => team;
+    public int GetPair() => pair;
+    public Character GetOpponent()
+    {
+        if (opponentId.Value == 0) return null; // no opponent assigned yet
+
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(opponentId.Value, out var netObj))
+        {
+            return netObj.GetComponent<Character>();
+        }
+        return null;
+    }
+
+    public void ModifyHealth(int difference)
+    {
+        if (IsServer)
+        {
+            health.Value += difference;
+        }
+    }
+    public void ModifyExhaustion(int difference)
+    {
+        if (IsServer)
+            exhaustion.Value += difference;
+    }
+    public void SetCurrentChoice(Choices newChoice)
+    {
+        currentChoice.Value = newChoice;
+        if (IsServer)
+            PhaseManager.Instance.RemoveUndecided(this);
+    }
+    public void SetOpponent(Character newOpponent, int newPair)
+    {
+        if (IsServer)
+        {
+            opponentId.Value = newOpponent != null ? newOpponent.NetworkObjectId : 0;
+            pair = newPair;
+        }
+        if (newOpponent != null)
+            Debug.Log($"{name} paired with {newOpponent.name} (Pair {pair})");
+        else
+            Debug.Log($"{name} has no opponent assigned.");
+    }
+    
+    [ServerRpc(RequireOwnership = true)]
+    public void SetChoiceServerRpc(Choices newChoice)
+    {
+        currentChoice.Value = newChoice;
+        PhaseManager.Instance.RemoveUndecided(this);
+    }
 }
