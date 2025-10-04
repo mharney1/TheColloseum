@@ -14,6 +14,7 @@ public class SpawnerManager : MonoBehaviour
 
     private void Awake()
     {
+        
         // Singleton enforcement (server only)
         if (Instance != null && Instance != this)
         {
