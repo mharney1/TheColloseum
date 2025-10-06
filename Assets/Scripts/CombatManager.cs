@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Services.Multiplay.Authoring.Core.MultiplayApi;
 using UnityEngine;
 
 public class CombatManager : MonoBehaviour

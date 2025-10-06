@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEngine;
 
 public class PairManager : NetworkBehaviour
 {
@@ -19,7 +18,8 @@ public class PairManager : NetworkBehaviour
     public bool AllPlayersConnected(int expectedPlayers) => idlePlayers.Count >= expectedPlayers;
     public void AddIdlePlayer(Character player) { if (IsServer && !idlePlayers.Contains(player)) idlePlayers.Add(player); }
     public void RemoveIdlePlayer(Character player) { if (IsServer && idlePlayers.Contains(player)) idlePlayers.Remove(player); }
-    public int GetIdlePlayers() => idlePlayers.Count;
+    public List<Character> GetIdlePlayers() => idlePlayers;
+    public int GetIdlePlayerCount() => idlePlayers.Count;
     public Dictionary<int, (Character, Character)> GetAllPairs() => pairs;
     public void TryPairing()
     {
@@ -49,21 +49,21 @@ public class PairManager : NetworkBehaviour
             if (!pairMade) break;
         }
     }
-    public void removePair(int key)
+    public void RemovePair(int key)
     {
         (Character c1, Character c2) = pairs[key];
 
         foreach (Character player in new[] { c1, c2 })
         {
-            player.SetOpponentClientRPC(111, -1);
-
-            if (player.GetHealth() != 1)
+            player.ClearOpponentClientRpc();
+            if (!player.GetDefeated())
             {
                 AddIdlePlayer(player);
             }
         }
         pairs.Remove(key);
     }
+    public int GetPairCount() => pairs.Count;
     public void GetCombatants()
     {
         foreach (var pair in pairs.Values)

@@ -1,10 +1,8 @@
 using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
-using NUnit.Framework;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Services.Lobbies.Models;
 
 public class PhaseManager : NetworkBehaviour
 {
@@ -16,6 +14,7 @@ public class PhaseManager : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI prepareTimerText;
     [SerializeField] private GameObject combatManagerPrefab;
     private readonly List<Character> undecidedCharacters = new();
+    private bool winCondition = false;
     private NetworkVariable<float> timer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<Phase> CurrentPhase = new(Phase.Load, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -32,13 +31,13 @@ public class PhaseManager : NetworkBehaviour
     private IEnumerator GameLoop()
     {
         yield return LoadPhase();
-        while (true)
+        while (!winCondition)
         {
             yield return PreparePhase();
             yield return ActionPhase();
             yield return ResolvePhase();
-            yield return EndPhase();
         }
+        yield return EndPhase();
     }
 
     private IEnumerator LoadPhase()
@@ -79,7 +78,34 @@ public class PhaseManager : NetworkBehaviour
         Debug.Log("Phase: Resolve phase has begun.");
         CurrentPhase.Value = Phase.Resolve;
         PairManager.Instance.TryPairing();
-        yield return new WaitForSeconds(1f);
+
+        //if theres are no active players we need to find the winner
+        if (PairManager.Instance.GetPairCount() == 0)
+        {
+            //if theres more than 1 idle player need to confirm that all players are on the same team
+            if (PairManager.Instance.GetIdlePlayerCount() > 1)
+            {
+                bool opponentsFound = false;
+                List<Character> idlePlayers = PairManager.Instance.GetIdlePlayers();
+                if (idlePlayers[0].GetTeam() != -1)
+                {
+                    for (int i = 0; i < idlePlayers.Count - 1 && !opponentsFound; i++)
+                    {
+                        for (int j = i + 1; j < idlePlayers.Count && !opponentsFound; j++)
+                        {
+                            if (idlePlayers[i].GetTeam() != idlePlayers[j].GetTeam())
+                            {
+                                opponentsFound = true;
+                            }
+                        }
+                    }
+                    if (!opponentsFound) winCondition = true;
+                }
+            }
+            else winCondition = true;
+            if (!winCondition) PairManager.Instance.TryPairing();
+        }
+        yield return null;
     }
     private IEnumerator EndPhase()
     {

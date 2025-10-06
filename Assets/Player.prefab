@@ -1369,6 +1369,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   maxHealth: 550
   health: 0
+  choices: 
 --- !u!54 &835451947027209037
 Rigidbody:
   m_ObjectHideFlags: 0
