@@ -23,7 +23,7 @@ public class PhaseManager : NetworkBehaviour
         base.OnNetworkSpawn();
 
         if (Instance != null && Instance != this) Destroy(gameObject);
-        timer.OnValueChanged += (oldVal, newVal) => {prepareTimerText.text = Mathf.CeilToInt(newVal).ToString("00");};
+        timer.OnValueChanged += (oldVal, newVal) => { prepareTimerText.text = Mathf.CeilToInt(newVal).ToString("00"); };
         Instance = this;
         if (IsServer) StartCoroutine(GameLoop());
     }
@@ -111,19 +111,85 @@ public class PhaseManager : NetworkBehaviour
     {
         Debug.Log("Phase: End phase has begun.");
         CurrentPhase.Value = Phase.End;
-        yield return new WaitForSeconds(1f);
+
+        List<Character> alivePlayers = PairManager.Instance.GetIdlePlayers();
+
+        if (alivePlayers.Count == 0)
+        {
+            // Tie
+            AnnounceTieClientRpc();
+        }
+        else
+        {
+            int winningTeam = alivePlayers[0].GetTeam();
+
+            if (winningTeam == -1)
+            {
+                // Free-for-all: single winner
+                AnnounceEndGameClientRpc(winningTeam, alivePlayers[0].OwnerClientId);
+            }
+            else
+            {
+                // Team mode: all alive players on the same team win
+                AnnounceEndGameClientRpc(winningTeam, ulong.MaxValue);
+            }
+        }
+
+        yield return new WaitForSeconds(2f);
     }
 
-    private void DefaultChoice(List<Character> characters){
+
+    private void DefaultChoice(List<Character> characters)
+    {
         foreach (Character character in new List<Character>(characters)) character.SetChoiceServerRpc(Choices.Attack);
     }
-    public void AddUndecided (Character player){
+    public void AddUndecided(Character player)
+    {
         if (!undecidedCharacters.Contains(player)) undecidedCharacters.Add(player);
     }
-    public void RemoveUndecided (Character player){
+    public void RemoveUndecided(Character player)
+    {
         if (undecidedCharacters.Contains(player)) undecidedCharacters.Remove(player);
     }
-
     [ClientRpc]
-    private void SetPrepareTimerActiveClientRpc (bool isActive){prepareTimerText?.transform.parent.gameObject.SetActive(isActive);}
+    private void SetPrepareTimerActiveClientRpc(bool isActive) { prepareTimerText?.transform.parent.gameObject.SetActive(isActive); }
+    [ClientRpc]
+    private void AnnounceTieClientRpc()
+    {
+        Character localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>();
+
+        EndScreenUI endScreen = localPlayer.GetComponentInChildren<EndScreenUI>();
+        if (endScreen != null)
+        {
+            endScreen.ShowEndScreen("The Match Ended in a Tie!");
+        }
+    }
+    [ClientRpc]
+    private void AnnounceEndGameClientRpc(int winningTeam, ulong winningPlayerId)
+    {
+        Debug.Log($"The Winner is {winningPlayerId}");
+        Character localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>();
+        bool hasWon = false;
+
+        if (winningPlayerId != ulong.MaxValue)
+        {
+            // Free-for-all: check if local player is the winner
+            hasWon = (localPlayer.OwnerClientId == winningPlayerId);
+        }
+        else
+        {
+            // Team mode: check if local player is on the winning team
+            hasWon = (localPlayer.GetTeam() == winningTeam);
+        }
+
+        // Use EndScreenUI to display message
+        EndScreenUI endScreen = localPlayer.GetComponentInChildren<EndScreenUI>();
+        if (endScreen != null)
+        {
+            string message = hasWon
+                ? (winningTeam == -1 ? "You Have Won!" : "Your Team Has Won!")
+                : (winningTeam == -1 ? "You Have Lost!" : "Your Team Has Lost!");
+            endScreen.ShowEndScreen(message);
+        }
+    }
 }
