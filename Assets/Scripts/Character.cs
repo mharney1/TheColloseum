@@ -38,7 +38,7 @@ public class Character : NetworkBehaviour
     }
     private void Update()
     {
-        if (IsServer && health == minHealth && !defeated) Defeated();
+        if (IsServer && health == minHealth && pair != -1 && defeated) Defeated();
         else if (health == minHealth && !defeated) defeated = true;
     }
     private void OnDisable() { if (PhaseManager.Instance != null) PhaseManager.Instance.CurrentPhase.OnValueChanged -= HandlePhaseChanged; }
@@ -154,7 +154,6 @@ public class Character : NetworkBehaviour
     private void RequestPlayerNameServerRPC() => SendPlayerNameClientRpc(name);
     public void Defeated()
     {
-        defeated = true;
         PairManager.Instance.RemovePair(pair);
     }
     public bool GetDefeated() => defeated;
