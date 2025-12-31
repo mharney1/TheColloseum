@@ -1,87 +1,102 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using System.Collections;
 
 public class SpawnerManager : MonoBehaviour
 {
-    public static SpawnerManager Instance { get; private set; }
+	public static SpawnerManager Instance
+	{
+		get; private set;
+	}
 
-    [Header("Spawner Settings")]
-    [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private Transform[] spawnPoints;
+	[Header( "Spawner Settings" )]
+	[SerializeField] private GameObject _playerPrefab;
+	[SerializeField] private Transform [] _spawnPoints;
 
-    private int nextSpawnIndex = 0;
+	private int _nextSpawnIndex = 0;
 
-    private void Awake()
-    {
-        
-        // Singleton enforcement (server only)
-        if (Instance != null && Instance != this)
-        {
-            Debug.LogWarning($"Duplicate SpawnerManager found on {gameObject.name}. Destroying this instance.");
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+	private void Awake()
+	{
 
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnected;
-        }
-        else
-        {
-            Debug.LogError("SpawnerManager: NetworkManager not found!");
-        }
-    }
+		// Singleton enforcement (server only)
+		if (Instance != null && Instance != this)
+		{
+			Debug.LogWarning( $"Duplicate SpawnerManager found on {gameObject.name}. Destroying this instance." );
+			Destroy( gameObject );
+			return;
+		}
+		Instance = this;
 
-    private void OnDestroy()
-    {
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnected;
-        }
-    }
+		if (NetworkManager.Singleton != null)
+		{
+			NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnected;
+		}
+		else
+		{
+			Debug.LogError( "SpawnerManager: NetworkManager not found!" );
+		}
+	}
 
-    private void HandleClientConnected(ulong clientId)
-    {
-        if (!NetworkManager.Singleton.IsServer) return;
+	private void OnDestroy()
+	{
+		if (NetworkManager.Singleton != null)
+		{
+			NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnected;
+		}
+	}
 
-        Debug.Log($"Client {clientId} connected. Queuing spawn...");
-        StartCoroutine(SpawnPlayerWithDelay(clientId));
-    }
+	private void HandleClientConnected(ulong clientId)
+	{
+		if (!NetworkManager.Singleton.IsServer)
+		{
+			return;
+		}
 
-    private IEnumerator SpawnPlayerWithDelay(ulong clientId)
-    {
-        // Small delay to avoid race conditions
-        yield return new WaitForSeconds(0.25f);
+		Debug.Log( $"Client {clientId} connected. Queuing spawn..." );
+		StartCoroutine( SpawnPlayerWithDelay( clientId ) );
+	}
 
-        if (playerPrefab == null || spawnPoints.Length == 0)
-        {
-            Debug.LogError("SpawnerManager: Missing prefab or spawn points.");
-            yield break;
-        }
+	private IEnumerator SpawnPlayerWithDelay(ulong clientId)
+	{
+		// Small delay to avoid race conditions
+		yield return new WaitForSeconds( 0.25f );
 
-        var spawnPoint = spawnPoints[nextSpawnIndex % spawnPoints.Length];
-        nextSpawnIndex++;
+		if (_playerPrefab == null || _spawnPoints.Length == 0)
+		{
+			Debug.LogError( "SpawnerManager: Missing prefab or spawn points." );
+			yield break;
+		}
 
-        GameObject playerInstance = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-        playerInstance.name = $"Player_{clientId}";
+		var spawnPoint = _spawnPoints [ _nextSpawnIndex % _spawnPoints.Length ];
+		int playerNumber = (_nextSpawnIndex % 4);
+		_nextSpawnIndex++;
 
-        var netObj = playerInstance.GetComponent<NetworkObject>();
-        if (netObj == null)
-        {
-            Debug.LogError($"Player prefab is missing a NetworkObject! Cannot spawn {playerInstance.name}.");
-            Destroy(playerInstance);
-            yield break;
-        }
+		GameObject playerInstance = Instantiate( _playerPrefab, spawnPoint.position, spawnPoint.rotation );
+		playerInstance.name = $"Player_{clientId}";
 
-        if (!netObj.IsSpawned)
-        {
-            netObj.SpawnAsPlayerObject(clientId);
-        }
-        else
-        {
-            Debug.LogWarning($"Tried to spawn Player_{clientId}, but object was already spawned.");
-        }
-    }
+		var netObj = playerInstance.GetComponent<NetworkObject>();
+		if (netObj == null)
+		{
+			Debug.LogError( $"Player prefab is missing a NetworkObject! Cannot spawn {playerInstance.name}." );
+			Destroy( playerInstance );
+			yield break;
+		}
+
+		if (!netObj.IsSpawned)
+		{
+			netObj.SpawnAsPlayerObject( clientId );
+
+			var character = playerInstance.GetComponent<Character>();
+			if (character != null)
+			{
+				int index = Mathf.Clamp( playerNumber, 0, 3 ); // convert 1..4 to 0..3
+				character.identity.SetColorIndexOnServer( index ); // server sets the NetworkVariable
+			}
+		}
+		else
+		{
+			Debug.LogWarning( $"Tried to spawn Player_{clientId}, but object was already spawned." );
+		}
+	}
+
 }

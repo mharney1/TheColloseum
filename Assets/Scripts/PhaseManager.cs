@@ -1,195 +1,153 @@
-using Unity.Netcode;
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
+using UnityEngine;
 
 public class PhaseManager : NetworkBehaviour
 {
-    public static PhaseManager Instance { get; private set; }
+	public static PhaseManager Instance
+	{
+		get; private set;
+	}
 
-    [SerializeField] private int expectedPlayers = 2;
-    [SerializeField] private float startTime = 15f;
-    [SerializeField] private float shortenedTime = 1f;
-    [SerializeField] private TextMeshProUGUI prepareTimerText;
-    [SerializeField] private GameObject combatManagerPrefab;
-    private readonly List<Character> undecidedCharacters = new();
-    private bool winCondition = false;
-    private NetworkVariable<float> timer = new NetworkVariable<float>(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public NetworkVariable<Phase> CurrentPhase = new(Phase.Load, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+	private float _startTime = 15f;
+	private float _shortenedTime = 5f;
+	[SerializeField] private TextMeshProUGUI _prepareTimerText;
+	[SerializeField] private GameObject _combatManagerPrefab;
+	private readonly List<Character> _undecidedCharacters = new();
+	private bool _winCondition = false;
+	private NetworkVariable<float> _timer = new NetworkVariable<float>( 0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server );
+	public NetworkVariable<Phases> CurrentPhase = new( Phases.Load, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server );
 
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
+	public void Awake()
+	{
+		if (Instance != null && Instance != this)
+		{
+			Destroy( gameObject );
+			return;
+		}
+	}
+	public override void OnNetworkSpawn()
+	{
+		base.OnNetworkSpawn();
 
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        timer.OnValueChanged += (oldVal, newVal) => { prepareTimerText.text = Mathf.CeilToInt(newVal).ToString("00"); };
-        Instance = this;
-        if (IsServer) StartCoroutine(GameLoop());
-    }
+		Instance = this;
+		_timer.OnValueChanged += OnTimerChanged;
 
-    private IEnumerator GameLoop()
-    {
-        yield return LoadPhase();
-        while (!winCondition)
-        {
-            yield return PreparePhase();
-            yield return ActionPhase();
-            yield return ResolvePhase();
-        }
-        yield return EndPhase();
-    }
+		if (IsServer)
+		{
+			StartCoroutine( GameLoop() );
+		}
+	}
 
-    private IEnumerator LoadPhase()
-    {
-        Debug.Log("Phase: Load phase has begun.");
-        CurrentPhase.Value = Phase.Load;
-        Instantiate(combatManagerPrefab);
-        while (PairManager.Instance == null) yield return new WaitForSeconds(1f);
-        while (!PairManager.Instance.AllPlayersConnected(expectedPlayers)) yield return new WaitForSeconds(3f);
-        PairManager.Instance.TryPairing();
-        while (CombatManager.Instance == null) yield return new WaitForSeconds(1f);
-    }
-    private IEnumerator PreparePhase()
-    {
-        Debug.Log("Phase: Prepare phase has begun.");
-        PairManager.Instance.GetCombatants();
-        CurrentPhase.Value = Phase.Prepare;
-        timer.Value = startTime;
-        SetPrepareTimerActiveClientRpc(true);
-        while (timer.Value > 0f)
-        {
-            if (undecidedCharacters.Count == 0 && timer.Value > shortenedTime) timer.Value = shortenedTime;
-            timer.Value = Mathf.Clamp(timer.Value - Time.deltaTime, 0f, startTime);
-            yield return null;
-        }
-        DefaultChoice(undecidedCharacters);
-        SetPrepareTimerActiveClientRpc(false);
-    }
-    private IEnumerator ActionPhase()
-    {
-        Debug.Log("Phase: Action phase has begun.");
-        CurrentPhase.Value = Phase.Action;
-        CombatManager.Instance.ResolveAllPairs();
-        yield return new WaitForSeconds(1f);
-    }
-    private IEnumerator ResolvePhase()
-    {
-        Debug.Log("Phase: Resolve phase has begun.");
-        CurrentPhase.Value = Phase.Resolve;
-        PairManager.Instance.TryPairing();
+	public override void OnNetworkDespawn()
+	{
+		_timer.OnValueChanged -= OnTimerChanged;
+	}
 
-        //if theres are no active players we need to find the winner
-        if (PairManager.Instance.GetPairCount() == 0)
-        {
-            //if theres more than 1 idle player need to confirm that all players are on the same team
-            if (PairManager.Instance.GetIdlePlayerCount() > 1)
-            {
-                bool opponentsFound = false;
-                List<Character> idlePlayers = PairManager.Instance.GetIdlePlayers();
-                if (idlePlayers[0].GetTeam() != -1)
-                {
-                    for (int i = 0; i < idlePlayers.Count - 1 && !opponentsFound; i++)
-                    {
-                        for (int j = i + 1; j < idlePlayers.Count && !opponentsFound; j++)
-                        {
-                            if (idlePlayers[i].GetTeam() != idlePlayers[j].GetTeam())
-                            {
-                                opponentsFound = true;
-                            }
-                        }
-                    }
-                    if (!opponentsFound) winCondition = true;
-                }
-            }
-            else winCondition = true;
-            if (!winCondition) PairManager.Instance.TryPairing();
-        }
-        yield return null;
-    }
-    private IEnumerator EndPhase()
-    {
-        Debug.Log("Phase: End phase has begun.");
-        CurrentPhase.Value = Phase.End;
+	private IEnumerator GameLoop()
+	{
+		yield return LoadPhase();
+		while (!_winCondition)
+		{
+			yield return PreparePhase();
+			yield return ActionPhase();
+			yield return ResolvePhase();
+		}
+		yield return EndPhase();
+	}
 
-        List<Character> alivePlayers = PairManager.Instance.GetIdlePlayers();
-
-        if (alivePlayers.Count == 0)
-        {
-            // Tie
-            AnnounceTieClientRpc();
-        }
-        else
-        {
-            int winningTeam = alivePlayers[0].GetTeam();
-
-            if (winningTeam == -1)
-            {
-                // Free-for-all: single winner
-                AnnounceEndGameClientRpc(winningTeam, alivePlayers[0].OwnerClientId);
-            }
-            else
-            {
-                // Team mode: all alive players on the same team win
-                AnnounceEndGameClientRpc(winningTeam, ulong.MaxValue);
-            }
-        }
-
-        yield return new WaitForSeconds(2f);
-    }
+	private IEnumerator LoadPhase()
+	{
+		CurrentPhase.Value = Phases.Load;
+		Instantiate( _combatManagerPrefab );
+		CombatResolver.Initialize();
+		yield return new WaitUntil( () => PlayerManager.Instance != null );
+		yield return new WaitUntil( () => PairManager.Instance != null );
+		yield return new WaitUntil( () => PlayerManager.Instance.AllPlayersRegistered( ) );
+		yield return StartCoroutine( PairManager.Instance.CreatePossiblePairs() );
+		yield return new WaitUntil( () => CombatManager.Instance != null );
+	}
+	private IEnumerator PreparePhase()
+	{
+		WinManager.Instance.GetLastAlive();
+		_undecidedCharacters.Clear();
+		PairManager.Instance.GetCombatants();
+		CurrentPhase.Value = Phases.Prepare;
+		float serverTime = _startTime;
+		_timer.Value = _startTime;
+		SetPrepareTimerActiveClientRpc( true );
 
 
-    private void DefaultChoice(List<Character> characters)
-    {
-        foreach (Character character in new List<Character>(characters)) character.SetChoiceServerRpc(Choices.Attack);
-    }
-    public void AddUndecided(Character player)
-    {
-        if (!undecidedCharacters.Contains(player)) undecidedCharacters.Add(player);
-    }
-    public void RemoveUndecided(Character player)
-    {
-        if (undecidedCharacters.Contains(player)) undecidedCharacters.Remove(player);
-    }
-    [ClientRpc]
-    private void SetPrepareTimerActiveClientRpc(bool isActive) { prepareTimerText?.transform.parent.gameObject.SetActive(isActive); }
-    [ClientRpc]
-    private void AnnounceTieClientRpc()
-    {
-        Character localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>();
+		while (_timer.Value > 0f)
+		{
+			if (_undecidedCharacters.Count == 0 && serverTime > _shortenedTime)
+			{
+				serverTime = _shortenedTime;
+			}
 
-        EndScreenUI endScreen = localPlayer.GetComponentInChildren<EndScreenUI>();
-        if (endScreen != null)
-        {
-            endScreen.ShowEndScreen("The Match Ended in a Tie!");
-        }
-    }
-    [ClientRpc]
-    private void AnnounceEndGameClientRpc(int winningTeam, ulong winningPlayerId)
-    {
-        Debug.Log($"The Winner is {winningPlayerId}");
-        Character localPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>();
-        bool hasWon = false;
+			serverTime = Mathf.Clamp( serverTime - Time.deltaTime, 0f, _startTime );
 
-        if (winningPlayerId != ulong.MaxValue)
-        {
-            // Free-for-all: check if local player is the winner
-            hasWon = (localPlayer.OwnerClientId == winningPlayerId);
-        }
-        else
-        {
-            // Team mode: check if local player is on the winning team
-            hasWon = (localPlayer.GetTeam() == winningTeam);
-        }
-
-        // Use EndScreenUI to display message
-        EndScreenUI endScreen = localPlayer.GetComponentInChildren<EndScreenUI>();
-        if (endScreen != null)
-        {
-            string message = hasWon
-                ? (winningTeam == -1 ? "You Have Won!" : "Your Team Has Won!")
-                : (winningTeam == -1 ? "You Have Lost!" : "Your Team Has Lost!");
-            endScreen.ShowEndScreen(message);
-        }
-    }
+			if (Mathf.Floor( _timer.Value ) != Mathf.Floor( serverTime ))
+			{
+				_timer.Value = Mathf.Max( 0f, Mathf.Floor( serverTime ) );
+			}
+			yield return null;
+		}
+		DefaultChoice();
+		SetPrepareTimerActiveClientRpc( false );
+	}
+	private IEnumerator ActionPhase()
+	{
+		CurrentPhase.Value = Phases.Action;
+		yield return StartCoroutine( CombatManager.Instance.ResolveAllPairs() );
+	}
+	private IEnumerator ResolvePhase()
+	{
+		CurrentPhase.Value = Phases.Resolve;
+		yield return StartCoroutine( PairManager.Instance.CreatePossiblePairs() );
+		_winCondition = WinManager.Instance.CheckWinConditions();
+	}
+	private IEnumerator EndPhase()
+	{
+		Debug.Log( "EndPhase has begun" );
+		CurrentPhase.Value = Phases.End;
+		WinManager.Instance.FindWinners();
+		yield return null;
+	}
+	public Phases GetCurrentPhase()
+	{
+		return CurrentPhase.Value;
+	}
+	private void DefaultChoice()
+	{
+		while (_undecidedCharacters.Count > 0)
+		{
+			_undecidedCharacters [ 0 ].combat.SetChoiceServerRpc( Choices.Attack );
+		}
+	}
+	public void AddUndecided(Character player)
+	{
+		if (!_undecidedCharacters.Contains( player ))
+		{
+			_undecidedCharacters.Add( player );
+		}
+	}
+	public void RemoveUndecided(Character player)
+	{
+		_undecidedCharacters.Remove( player );
+	}
+	private void OnTimerChanged(float oldVal, float newVal)
+	{
+		if (_prepareTimerText != null)
+		{
+			_prepareTimerText.text = Mathf.CeilToInt( newVal ).ToString( "00" );
+		}
+	}
+	[ClientRpc]
+	private void SetPrepareTimerActiveClientRpc(bool isActive)
+	{
+		_prepareTimerText?.transform.parent.gameObject.SetActive( isActive );
+	}
 }

@@ -4,38 +4,38 @@ using UnityEngine.UI;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    [SerializeField] private GameObject networkMenuPanel;
-    [SerializeField] private Button hostBtn;
-    [SerializeField] private Button serverBtn;
-    [SerializeField] private Button clientBtn;
+	[SerializeField] private GameObject _networkMenuPanel;
+	[SerializeField] private Button _hostBtn;
+	[SerializeField] private Button _serverBtn;
+	[SerializeField] private Button _clientBtn;
 
-    private void Awake()
-    {
-        networkMenuPanel.SetActive(true);
-        
-        hostBtn.onClick.AddListener(() =>
-        {
-            if (networkMenuPanel != null)
-            {
-                networkMenuPanel.SetActive(false);
-            }
-            NetworkManager.Singleton.StartHost();
-        });
-        serverBtn.onClick.AddListener(() =>
-        {
-             if (networkMenuPanel != null)
-            {
-                networkMenuPanel.SetActive(false);
-            }
-            NetworkManager.Singleton.StartServer();
-        });
-        clientBtn.onClick.AddListener(() =>
-        {
-             if (networkMenuPanel != null)
-            {
-                networkMenuPanel.SetActive(false);
-            }
-            NetworkManager.Singleton.StartClient();
-        });
-    }
+	private void Awake()
+	{
+		_networkMenuPanel.SetActive( true );
+
+		_hostBtn.onClick.AddListener( () =>
+		{
+			if (_networkMenuPanel != null)
+			{
+				_networkMenuPanel.SetActive( false );
+			}
+			NetworkManager.Singleton.StartHost();
+		} );
+		_serverBtn.onClick.AddListener( () =>
+		{
+			if (_networkMenuPanel != null)
+			{
+				_networkMenuPanel.SetActive( false );
+			}
+			NetworkManager.Singleton.StartServer();
+		} );
+		_clientBtn.onClick.AddListener( () =>
+		{
+			if (_networkMenuPanel != null)
+			{
+				_networkMenuPanel.SetActive( false );
+			}
+			NetworkManager.Singleton.StartClient();
+		} );
+	}
 }

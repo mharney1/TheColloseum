@@ -1,0 +1,87 @@
+[Temp/**]
+generated_code = true
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = tab
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# C# files
+[*.cs]
+# Braces and single-line blocks/statements
+csharp_new_line_before_open_brace = all
+csharp_preserve_single_line_blocks = false
+csharp_preserve_single_line_statements = false
+
+# Indentation
+csharp_indent_block_contents = true
+csharp_indent_case_contents = true
+csharp_indent_labels = false
+
+# Spacing
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_before_open_square_brackets = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+
+csharp_space_around_binary_operators = before_and_after
+
+csharp_space_between_braces = true
+csharp_space_between_square_brackets = true
+csharp_space_between_parentheses = true
+csharp_space_after_comma = true
+
+# .NET style preferences
+dotnet_sort_system_directives_first = true
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_property = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_event = false
+
+# Naming rules
+
+# Private, serialized, and readonly fields -> _camelCase
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = error
+dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case_underscore
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.camel_case_underscore.capitalization = camel_case
+dotnet_naming_style.camel_case_underscore.required_prefix = _
+
+# Constants -> All_Caps
+dotnet_naming_rule.constants_should_have_c_prefix.severity = error
+dotnet_naming_rule.constants_should_have_c_prefix.symbols = constants
+dotnet_naming_rule.constants_should_have_c_prefix.style = c_prefix_all_caps
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_style.c_prefix_all_caps.capitalization = all_upper
+dotnet_naming_style.c_prefix_all_caps.word_separator = _
+dotnet_naming_style.c_prefix_all_caps.required_prefix = C_
+
+# Statics -> S_All_Caps
+dotnet_naming_rule.static_should_have_s_prefix.severity = error
+dotnet_naming_rule.static_should_have_s_prefix.symbols  = static_fields
+dotnet_naming_rule.static_should_have_s_prefix.style    = s_prefix_all_caps
+
+dotnet_naming_symbols.static_fields.applicable_kinds   = field
+dotnet_naming_symbols.static_fields.required_modifiers = static
+
+dotnet_naming_style.s_prefix_all_caps.capitalization = all_upper
+dotnet_naming_style.s_prefix_all_caps.word_separator = _
+dotnet_naming_style.s_prefix_all_caps.required_prefix = S_
+
+
+# Optional: You can add other naming rules later (e.g., methods, properties)
