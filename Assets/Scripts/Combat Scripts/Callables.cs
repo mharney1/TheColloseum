@@ -18,13 +18,6 @@ public enum Phases
 	Resolve,
 	End
 }
-public enum Modes
-{
-	Solo,
-	Team,
-	FFA,
-	MultiTeam
-}
 public enum DmgMultiplier
 {
 	None,

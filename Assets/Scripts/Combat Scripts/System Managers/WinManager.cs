@@ -14,7 +14,7 @@ public class WinManager : NetworkBehaviour
 	public static event Action<EndData> GameEnd;
 
 	private List<Character> _lastAlive;
-	private Modes _mode;
+	private GameMode _mode;
 
 	private void Awake()
 	{
@@ -25,7 +25,7 @@ public class WinManager : NetworkBehaviour
 		}
 
 		Instance = this;
-		_mode = Modes.FFA;
+		_mode = GameMode.FFA4P;
 	}
 
 	public bool CheckWinConditions()
@@ -64,7 +64,7 @@ public class WinManager : NetworkBehaviour
 	{
 		List<Character> idle = PlayerManager.Instance.GetIdlePlayers();
 		bool tie = false;
-		bool teamBased = (_mode == Modes.Team || _mode == Modes.MultiTeam);
+		bool teamBased = (( int )_mode >= ( int )GameMode.Duos);
 		var teamSet = new HashSet<int>();
 		var playerSet = new HashSet<ulong>();
 
