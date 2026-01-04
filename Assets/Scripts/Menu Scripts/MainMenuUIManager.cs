@@ -1,27 +1,14 @@
+using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.UI;
-public class FlowController : MonoBehaviour
-{
-	public static FlowController S_INSTANCE;
-	private MenuButtonBinder _menuBinder;
 
-	[Header( "Menu Panels" )]
+public class MainMenuUIManager : MonoBehaviour 
+{
+	[Header( "Panels" )]
 	public GameObject mainMenuPanel;
 	public GameObject matchTypePanel;
 	public GameObject gameModePanel;
 
-	private void Awake()
-	{
-		if (S_INSTANCE == null)
-		{
-			S_INSTANCE = this;
-			DontDestroyOnLoad( gameObject );
-		}
-		else
-		{
-			Destroy( gameObject );
-		}
-	}
+	private MenuButtonBinder _menuBinder;
 	public void RegisterMenuBinder(MenuButtonBinder binder)
 	{
 		Debug.Assert(
@@ -31,6 +18,7 @@ public class FlowController : MonoBehaviour
 
 		_menuBinder = binder;
 	}
+
 	public void OnFightSelected()
 	{
 		GameSession.S_INSTANCE.ResetSession();
@@ -38,6 +26,7 @@ public class FlowController : MonoBehaviour
 		mainMenuPanel.SetActive( false );
 		matchTypePanel.SetActive( true );
 	}
+
 	public void SelectMatchType(MatchType type)
 	{
 		GameSession.S_INSTANCE.matchType = type;
@@ -47,6 +36,7 @@ public class FlowController : MonoBehaviour
 
 		_menuBinder.FilterGameModes( type );
 	}
+
 	public void BackToMainMenu()
 	{
 		GameSession.S_INSTANCE.ResetSession();
@@ -54,12 +44,14 @@ public class FlowController : MonoBehaviour
 		matchTypePanel.SetActive( false );
 		mainMenuPanel.SetActive( true );
 	}
+
 	public void SelectGameMode(GameMode mode)
 	{
 		GameSession.S_INSTANCE.gameMode = mode;
 		ResolveTotalSlots();
 		ResolveParticipants();
-		GameSession.S_INSTANCE.DebugPrint();
+		FlowManager.S_INSTANCE.ToLobby();
+		ShutDown();
 	}
 
 	public void BackToMatchType()
@@ -69,12 +61,7 @@ public class FlowController : MonoBehaviour
 		gameModePanel.SetActive( false );
 		matchTypePanel.SetActive( true );
 	}
-	public void BackToGameMode()
-	{
-		GameSession.S_INSTANCE.gameMode = GameMode.None;
 
-		//Placeholder will need to return to the mainmenu scene and set gamemodepanel active
-	}
 	private void ResolveTotalSlots()
 	{
 		int players = 0;
@@ -101,6 +88,7 @@ public class FlowController : MonoBehaviour
 		}
 		GameSession.S_INSTANCE.totalPlayerCount = players;
 	}
+
 	private void ResolveParticipants()
 	{
 		int total = GameSession.S_INSTANCE.totalPlayerCount;
@@ -120,6 +108,10 @@ public class FlowController : MonoBehaviour
 				players = 1;
 				ai = total - 1;
 				break;
+			case MatchType.Custom:
+				players = total;
+				ai = 0;
+				break;
 			default:
 				players = 0;
 				ai = 0;
@@ -127,5 +119,16 @@ public class FlowController : MonoBehaviour
 		}
 		GameSession.S_INSTANCE.humanPlayerCount = players;
 		GameSession.S_INSTANCE.aiPlayerCount = ai;
+	}
+
+	private void ShutDown()
+	{
+		_menuBinder.ShutDown();
+		enabled = false;
+		_menuBinder = null;
+		mainMenuPanel = null;
+		matchTypePanel = null;
+		gameModePanel = null;
+		
 	}
 }

@@ -16,8 +16,20 @@ public enum MatchType
 	None,
 	SinglePlayer,
 	CoOp,
-	Multiplayer
+	Multiplayer,
+	Custom
 }
+public enum LobbyType
+{
+	Public,
+	Custom
+}
+public enum LobbyVisibility
+{
+	Public,
+	Private
+}
+
 
 public class GameSession : MonoBehaviour
 {
