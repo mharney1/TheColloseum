@@ -36,8 +36,8 @@ public struct EndData : INetworkSerializable
 {
 	public bool Tie;
 	public bool TeamBased;
-	public int[] WinningTeams;
-	public ulong[] WinningPlayerIds;
+	public Team[] WinningTeams;
+	public int[] WinningPlayerIds;
 
 	public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
 	{
@@ -60,9 +60,4 @@ public struct CombatOutcome
 
 	public bool dizzyP1;
 	public bool dizzyP2;
-}
-public interface ICharacterDecision
-{
-	/// Called when a character must decide a choice for the current phase
-	void Decide(Character character);
 }

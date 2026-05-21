@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\mario\\Unity Projects\\MyProject\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\mario\\unity projects\\myproject\\assets\\scripts\\lobby scripts\\lobbystatemachine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\lobby scripts\\lobbystatemachine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\mario\\unity projects\\myproject\\assets\\scripts\\combat scripts\\statemachine\\states\\preparestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\combat scripts\\statemachine\\states\\preparestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "LobbyStateMachine.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Lobby Scripts\\LobbyStateMachine.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Lobby Scripts\\LobbyStateMachine.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Lobby Scripts\\LobbyStateMachine.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Lobby Scripts\\LobbyStateMachine.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-13T17:37:32.327Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PrepareState.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\StateMachine\\States\\PrepareState.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Combat Scripts\\StateMachine\\States\\PrepareState.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\StateMachine\\States\\PrepareState.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Combat Scripts\\StateMachine\\States\\PrepareState.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-13T17:37:17.116Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -13,8 +13,8 @@ public class AnchorManager : MonoBehaviour
 	[Header( "Circle Settings" )]
 	private readonly float _radius = 5f;
 	[SerializeField] private NetworkObject _anchorPrefab;
-	private readonly float _rotationSpeed = 25f; // degrees per second
-	private readonly Dictionary<ulong, Transform> _assignments = new();
+	private readonly float _rotationSpeed = 25f;
+	private readonly Dictionary<int, Transform> _assignments = new();
 	private readonly List<NetworkObject> _anchors = new();
 
 	private void Awake()
@@ -28,10 +28,10 @@ public class AnchorManager : MonoBehaviour
 	}
 	private void Update()
 	{
-		if (PhaseManager.Instance == null || (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer) )
+		if (CombatDirector.S_INSTANCE == null || (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer) )
 			return;
 
-		if (PhaseManager.Instance.CurrentPhase.Value == Phases.Prepare)
+		if (CombatDirector.S_INSTANCE.CurrentState.Value == CombatState.Prepare)
 		{
 			transform.Rotate(
 				Vector3.up,
@@ -66,7 +66,6 @@ public class AnchorManager : MonoBehaviour
 		if (!NetworkManager.Singleton.IsServer)
 			return;
 
-		// Clear existing anchors first
 		foreach (var anchor in _anchors)
 		{
 			if (anchor != null && anchor.IsSpawned)
@@ -75,7 +74,6 @@ public class AnchorManager : MonoBehaviour
 		_anchors.Clear();
 		_assignments.Clear();
 
-		// Each pair = 2 anchors (across from each other)
 		int totalAnchors = pairCount * 2;
 		float angleStep = 360f / totalAnchors;
 
@@ -107,8 +105,8 @@ public class AnchorManager : MonoBehaviour
 		int i = 0;
 		foreach (var pair in pairs.Values)
 		{
-			_assignments [ pair.Item1.OwnerClientId ] = _anchors [ i ].transform;
-			_assignments [ pair.Item2.OwnerClientId ] = _anchors [ i + pairs.Count ].transform;
+			_assignments [ pair.Item1.identity.GetCharacterID() ] = _anchors [ i ].transform;
+			_assignments [ pair.Item2.identity.GetCharacterID() ] = _anchors [ i + pairs.Count ].transform;
 			Debug.Assert( Vector3.Distance(
 				_anchors [ i ].transform.localPosition, -_anchors [ i + pairs.Count ].transform.localPosition ) < 0.01f,
 				"Anchor symmetry broken." );
@@ -118,7 +116,7 @@ public class AnchorManager : MonoBehaviour
 	}
 	private Transform GetAnchorFor(Character p)
 	{
-		ulong playerID = p.OwnerClientId;
+		int playerID = p.identity.GetCharacterID();
 		if (_assignments.TryGetValue( playerID, out Transform anchor ))
 			return anchor;
 

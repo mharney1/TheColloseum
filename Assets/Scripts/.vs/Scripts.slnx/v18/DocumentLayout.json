@@ -1,0 +1,170 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\NetworkBootstrap.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Independant\\NetworkBootstrap.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\PhaseManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\System Managers\\PhaseManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterIdentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\Character Scripts\\CharacterIdentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\SpawnManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\System Managers\\SpawnManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\SceneLoader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Independant\\SceneLoader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Menu Scripts\\DebugSceneLoader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Menu Scripts\\DebugSceneLoader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\Character Scripts\\CharacterStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\Character.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\Character Scripts\\Character.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\SliderUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Combat Scripts\\Character Scripts\\SliderUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NetworkBootstrap.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\NetworkBootstrap.cs",
+              "RelativeDocumentMoniker": "Independant\\NetworkBootstrap.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\NetworkBootstrap.cs",
+              "RelativeToolTip": "Independant\\NetworkBootstrap.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-24T01:15:59.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SceneLoader.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\SceneLoader.cs",
+              "RelativeDocumentMoniker": "Independant\\SceneLoader.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Independant\\SceneLoader.cs",
+              "RelativeToolTip": "Independant\\SceneLoader.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAACkAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-24T01:14:20.652Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DebugSceneLoader.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Menu Scripts\\DebugSceneLoader.cs",
+              "RelativeDocumentMoniker": "Menu Scripts\\DebugSceneLoader.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Menu Scripts\\DebugSceneLoader.cs",
+              "RelativeToolTip": "Menu Scripts\\DebugSceneLoader.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-24T01:14:08.406Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SpawnManager.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\SpawnManager.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\System Managers\\SpawnManager.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\SpawnManager.cs",
+              "RelativeToolTip": "Combat Scripts\\System Managers\\SpawnManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T05:38:01.785Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CharacterIdentity.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterIdentity.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\Character Scripts\\CharacterIdentity.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterIdentity.cs",
+              "RelativeToolTip": "Combat Scripts\\Character Scripts\\CharacterIdentity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T05:37:10.189Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PhaseManager.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\PhaseManager.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\System Managers\\PhaseManager.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\System Managers\\PhaseManager.cs",
+              "RelativeToolTip": "Combat Scripts\\System Managers\\PhaseManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T05:28:54.204Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CharacterStats.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterStats.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\Character Scripts\\CharacterStats.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\CharacterStats.cs",
+              "RelativeToolTip": "Combat Scripts\\Character Scripts\\CharacterStats.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T04:49:39.953Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Character.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\Character.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\Character Scripts\\Character.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\Character.cs",
+              "RelativeToolTip": "Combat Scripts\\Character Scripts\\Character.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAswCwAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T04:41:43.767Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SliderUI.cs",
+              "DocumentMoniker": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\SliderUI.cs",
+              "RelativeDocumentMoniker": "Combat Scripts\\Character Scripts\\SliderUI.cs",
+              "ToolTip": "C:\\Users\\mario\\Unity Projects\\MyProject\\Assets\\Scripts\\Combat Scripts\\Character Scripts\\SliderUI.cs",
+              "RelativeToolTip": "Combat Scripts\\Character Scripts\\SliderUI.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAABvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-23T04:37:25.358Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

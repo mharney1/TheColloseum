@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class MenuButtonBinder : MonoBehaviour
 {
-	private MainMenuUIManager _manager;
+	private MenuUIManager _manager;
 
-	[Header( "Main Menu Buttons" )]
+	[ Header( "Main Menu Buttons" )]
 	[SerializeField] private Button _storyBtn;
 	[SerializeField] private Button _fightBtn;
 	[SerializeField] private Button _customizationBtn;
@@ -27,25 +27,16 @@ public class MenuButtonBinder : MonoBehaviour
 
 	private void Awake()
 	{
-		_manager = GetComponent<MainMenuUIManager>();
-		_manager.RegisterMenuBinder( this );
+		_manager = GetComponent<MenuUIManager>();
 
 		BindMainMenu();
 		BindMatchTypeMenu();
 		BindGameModeMenu();
 	}
 
-	public void ShutDown()
-	{
-		enabled = false;
-		_manager = null;
-		UnbindButtons();
-		Destroy( gameObject );
-	}
-
-	// =====================
-	// MAIN MENU
-	// =====================
+	/// <summary>
+	/// Main Menu
+	/// </summary>
 
 	private void BindMainMenu()
 	{
@@ -62,130 +53,72 @@ public class MenuButtonBinder : MonoBehaviour
 			_customizationBtn.interactable = false;
 	}
 
-	// =====================
-	// MATCH TYPE MENU
-	// =====================
+	/// <summary>
+	/// Match Type
+	/// </summary>
 
 	private void BindMatchTypeMenu()
 	{
 		if (_singlePlayerBtn != null)
-			_singlePlayerBtn.onClick.AddListener(
-				() => _manager.SelectMatchType( MatchType.SinglePlayer )
-			);
+			_singlePlayerBtn.onClick.AddListener(() => _manager.SelectMatchType( MatchType.SinglePlayer ));
 
 		if (_coopBtn != null)
-			_coopBtn.onClick.AddListener(
-				() => _manager.SelectMatchType( MatchType.CoOp )
-			);
+			_coopBtn.onClick.AddListener(() => _manager.SelectMatchType( MatchType.CoOp ));
 
 		if (_multiplayerBtn != null)
-			_multiplayerBtn.onClick.AddListener(
-				() => _manager.SelectMatchType( MatchType.Multiplayer )
-			);
+			_multiplayerBtn.onClick.AddListener(() => _manager.SelectMatchType( MatchType.Multiplayer ));
+
 		if (_customsBtn != null)
-			_customsBtn.onClick.AddListener(
-				() => _manager.SelectMatchType( MatchType.Custom )
-			);
+			_customsBtn.interactable = false;
+
 		if (_matchTypeBackBtn != null)
-			_matchTypeBackBtn.onClick.AddListener(
-				() => _manager.BackToMainMenu()
-			);
+			_matchTypeBackBtn.onClick.AddListener(() => _manager.BackToMainMenu());
 	}
 
-	// =====================
-	// GAME MODE MENU
-	// =====================
+	/// <summary>
+	/// Game Mode
+	/// </summary>
 
 	private void BindGameModeMenu()
 	{
 		if (_solosBtn != null)
-			_solosBtn.onClick.AddListener(
-				() => _manager.SelectGameMode( GameMode.Solos )
-			);
+			_solosBtn.onClick.AddListener(() => _manager.SelectGameMode( GameMode.Solos ));
 
 		if (_duosBtn != null)
-			_duosBtn.onClick.AddListener(
-				() => _manager.SelectGameMode( GameMode.Duos )
-			);
+			_duosBtn.onClick.AddListener(() => _manager.SelectGameMode( GameMode.Duos ));
 
 		if (_quadsBtn != null)
-			_quadsBtn.onClick.AddListener(
-				() => _manager.SelectGameMode( GameMode.Quads )
-			);
+			_quadsBtn.onClick.AddListener(() => _manager.SelectGameMode( GameMode.Quads ));
 
 		if (_ffa4pBtn != null)
-			_ffa4pBtn.onClick.AddListener(
-				() => _manager.SelectGameMode( GameMode.FFA4P )
-			);
+			_ffa4pBtn.onClick.AddListener(() => _manager.SelectGameMode( GameMode.FFA4P ));
 
 		if (_ffa8pBtn != null)
-			_ffa8pBtn.onClick.AddListener(
-				() => _manager.SelectGameMode( GameMode.FFA8P )
-			);
+			_ffa8pBtn.onClick.AddListener(() => _manager.SelectGameMode( GameMode.FFA8P ));
+
 		if (_gameModeBackBtn != null)
-			_gameModeBackBtn.onClick.AddListener(
-				() => _manager.BackToMatchType()
-			);
+			_gameModeBackBtn.onClick.AddListener(() => _manager.BackToMatchType());
 	}
 
-	private void UnbindButtons()
-	{
-		_storyBtn.onClick.RemoveAllListeners();
-		_fightBtn.onClick.RemoveAllListeners();
-		_customizationBtn.onClick.RemoveAllListeners();
-		_singlePlayerBtn.onClick.RemoveAllListeners();
-		_coopBtn.onClick.RemoveAllListeners();
-		_multiplayerBtn.onClick.RemoveAllListeners();
-		_customsBtn.onClick.RemoveAllListeners();
-		_matchTypeBackBtn.onClick.RemoveAllListeners();
-		_solosBtn.onClick.RemoveAllListeners();
-		_ffa4pBtn.onClick.RemoveAllListeners();
-		_ffa8pBtn.onClick.RemoveAllListeners();
-		_duosBtn.onClick.RemoveAllListeners();
-		_quadsBtn.onClick.RemoveAllListeners();
-		_gameModeBackBtn.onClick.RemoveAllListeners();
-	}
-
-	public void FilterGameModes(MatchType type)
+	public void RefreshGameModeAvailability(MatchType type)
 	{
 		Debug.Assert(
 			type != MatchType.None,
 			"FilterGameModes called with MatchType.None"
 		);
 
-		SetGameModeButton( _solosBtn, IsSolosAllowed( type ) );
-		SetGameModeButton( _duosBtn, IsDuosAllowed( type ) );
-		SetGameModeButton( _quadsBtn, IsQuadsAllowed( type ) );
-		SetGameModeButton( _ffa4pBtn, IsFfaAllowed( type ) );
-		SetGameModeButton( _ffa8pBtn, IsFfaAllowed( type ) );
+		SetGameModeButton(_solosBtn, MatchRules.IsCombinationValid(type, GameMode.Solos));
+		SetGameModeButton(_duosBtn, MatchRules.IsCombinationValid(type, GameMode.Duos));
+		SetGameModeButton(_quadsBtn, MatchRules.IsCombinationValid(type, GameMode.Quads));
+		SetGameModeButton(_ffa4pBtn, MatchRules.IsCombinationValid(type, GameMode.FFA4P));
+		SetGameModeButton(_ffa8pBtn, MatchRules.IsCombinationValid(type, GameMode.FFA8P));
 	}
-	private void SetGameModeButton(Button button, bool enabled)
+
+	public void SetGameModeButton(Button button, bool enabled)
 	{
 		if (button == null)
 			return;
 
 		button.interactable = enabled;
-
-		// Optional future hook:
-		// button.GetComponent<ComingSoonTag>()?.SetVisible( !enabled );
-	}
-	private bool IsSolosAllowed(MatchType type)
-	{
-		return type != MatchType.CoOp;
-	}
-
-	private bool IsDuosAllowed(MatchType type)
-	{
-		return true;
-	}
-
-	private bool IsQuadsAllowed(MatchType type)
-	{
-		return true;
-	}
-
-	private bool IsFfaAllowed(MatchType type)
-	{
-		return type != MatchType.CoOp;
 	}
 }

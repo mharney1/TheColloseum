@@ -13,8 +13,7 @@ public static class CombatResolver
 	private static float S_BASE_HEAL = 75;
 	private static CombatOutcome [,] S_MATRIX;
 
-	public static void Initialize(
-		)
+	public static void Initialize()
 	{
 		int count = Enum.GetValues( typeof( Choices ) ).Length;
 		S_MATRIX = new CombatOutcome [ count, count ];

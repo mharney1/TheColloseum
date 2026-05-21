@@ -1,106 +1,161 @@
-using System.Collections.Generic;
-using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyManager : NetworkBehaviour
 {
 	public static LobbyManager S_INSTANCE;
-	private List<LobbySlot> _slots = new List<LobbySlot>();
-	public IReadOnlyList<LobbySlot> slots => _slots;
 
-	public LobbyInitializer initializer;
-	public LobbyAIManager aiManager;
-	public LobbyStateManager stateManager;
-	public LobbyTimeManager timeManager;
-	//public LobbyValidator validator = new LobbyValidator();
+	private LobbyAIManager _aiManager;
+	private LobbyStateMachine _stateMachine;
+	private SlotManager _slotManager;
 
+	private NetworkList<SlotData> _slots;
+
+	public NetworkVariable<float> TimeRemaining = new();
+	public NetworkVariable<int> CurrentState = new();
+
+	public LobbyAIManager AIManager => _aiManager;
+	public LobbyStateMachine StateMachine => _stateMachine;
+	public SlotManager SlotManager => _slotManager;
+
+	/// LIFECYCLE METHODS
+	/// <summary>
+	///These are the generic unity lifecycle methods.
+	/// </summary>
 	private void Awake()
 	{
 		if (S_INSTANCE == null)
 			S_INSTANCE = this;
 		else
-			Destroy( gameObject );
-	}
-	private void Start()
-	{
-		initializer = new LobbyInitializer( this );
-		aiManager = new LobbyAIManager( this );
-		stateManager = new LobbyStateManager( this );
-		timeManager = new LobbyTimeManager( this );
+			Destroy(gameObject);
 
-		initializer.Initialize();
-		ValidateLobbyInvariants();
+		_slots = new NetworkList<SlotData>();
+
+		_slotManager = new SlotManager(_slots);
 	}
 
-	private void Update()
+	public override void OnNetworkSpawn()
 	{
-		timeManager.Tick();
-		stateManager.Evaluate();
-	}
-	public void FinalizeLobby()
-	{
-		aiManager.AIFinal();
-	}
-	public IReadOnlyList<LobbySlot> GetSlotsImmutable()
-	{
-		return slots;
-	}
+		if (!IsServer)
+			return;
 
-	internal List<LobbySlot> GetSlots()
-	{
-		return _slots;
-	}
+		NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+		NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
 
-	public void ToggleLocalPlayerReady()
-	{
-		var localSlot = _slots.FirstOrDefault( s => s.isHost ); // assume host for now
-		if (localSlot != null && localSlot.status == SlotStatus.Human)
-			localSlot.isReady = !localSlot.isReady;
+		_aiManager = new LobbyAIManager(this);
+
+		InitializeLobby();
+
+		_stateMachine = new LobbyStateMachine(this);
+
+		_slotManager.AssignClientToSlot(
+			NetworkManager.Singleton.LocalClientId
+		);
 	}
 
-	public void Shutdown()
+	public override void OnNetworkDespawn()
 	{
-		enabled = false;
+		if (!IsServer || NetworkManager.Singleton == null)
+			return;
 
-		initializer = null;
-		aiManager = null;
-		stateManager = null;
-		timeManager = null;
+		NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+		NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
 
-		_slots.Clear();
+		_aiManager = null;
+		_stateMachine = null;
+		_slotManager = null;
+
 		if (S_INSTANCE == this)
 		{
 			S_INSTANCE = null;
 		}
 
-		Destroy( gameObject );
+		Destroy(gameObject);
 	}
 
-	private void ValidateLobbyInvariants()
+	private void Update()
 	{
-		int humans = 0;
-		int ai = 0;
+		if (!IsServer)
+			return;
 
-		foreach (var slot in _slots)
+		_stateMachine.Tick();
+
+		SyncNetworkState();
+
+		HandleSceneTransition();
+	}
+
+	/// SUBSCRIPTIONS
+	/// <summary>
+	/// These methods act as a connection for Slot Manager Methods and client events.
+	/// </summary>
+	private void OnClientConnected(ulong clientId)
+	{
+		_slotManager.AssignClientToSlot(clientId);
+	}
+
+	private void OnClientDisconnected(ulong clientId)
+	{
+		_slotManager.HandleClientDisconnected(clientId);
+	}
+
+	/// LOBBY FLOW
+	/// <summary>
+	/// These methods control the flow of the lobby.
+	/// </summary>
+	private void InitializeLobby()
+	{
+		Debug.Log("[LOBBY INITIALIZATION] Initializing lobby.");
+
+		_slotManager.InitializeNetworkSlots();
+
+		_slotManager.AssignTeams();
+
+		_aiManager.AIInitial();
+	}
+
+	public void FinalizeLobby()
+	{
+		_aiManager.AIFinal();
+
+		_slotManager.BuildGameSessionPlayers();
+	}
+
+	private void HandleSceneTransition()
+	{
+		if ((LobbyState)CurrentState.Value != LobbyState.Starting)
+			return;
+
+		NetworkManager.Singleton.SceneManager.LoadScene(
+			"Combat_Scene",
+			UnityEngine.SceneManagement.LoadSceneMode.Single
+		);
+	}
+
+	private void SyncNetworkState()
+	{
+		if (TimeRemaining.Value != _stateMachine.TimeRemaining)
 		{
-			if (slot.status == SlotStatus.Human)
-				humans++;
-
-			if (slot.status == SlotStatus.AI)
-				ai++;
+			TimeRemaining.Value =
+				_stateMachine.TimeRemaining;
 		}
 
-
-		if (GameSession.S_INSTANCE.matchType == MatchType.CoOp)
+		if (CurrentState.Value != (int)_stateMachine.CurrentState)
 		{
-			foreach (var slot in _slots)
-			{
-				if (slot.team == Team.TeamB)
-					Debug.Assert( slot.status == SlotStatus.AI,
-						"Team B mising AI"
-					);
-			}
+			CurrentState.Value =
+				(int)_stateMachine.CurrentState;
 		}
 	}
 
+	/// RPCS
+	[ServerRpc(RequireOwnership = false)]
+	public void ToggleReadyServerRpc(
+		ServerRpcParams rpcParams = default
+	)
+	{
+		ulong clientId =
+			rpcParams.Receive.SenderClientId;
+
+		_slotManager.ToggleReady(clientId);
+	}
 }
